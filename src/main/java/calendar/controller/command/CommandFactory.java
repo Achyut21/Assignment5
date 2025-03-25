@@ -11,11 +11,12 @@ public class CommandFactory {
   /** Processes a command string using the given controller. */
   public static Command process(String input, CalendarController controller) throws Exception {
     String[] tokens = input.trim().split("\\s+");
+
     if (tokens.length == 0) {
       throw new MissingParameterException("command");
     }
+
     String commandType = tokens[0].toLowerCase();
-    Command command = null;
 
     switch (commandType) {
       case "create":

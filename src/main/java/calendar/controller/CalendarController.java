@@ -1,6 +1,5 @@
 package calendar.controller;
 
-import calendar.controller.manager.CalendarManager;
 import calendar.controller.export.CSVCalendarExporter;
 import calendar.controller.export.CalendarExporter;
 import calendar.model.Calendar;

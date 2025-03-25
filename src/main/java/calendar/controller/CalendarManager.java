@@ -1,4 +1,4 @@
-package calendar.controller.manager;
+package calendar.controller;
 
 import calendar.model.Calendar;
 import java.time.ZoneId;
@@ -50,4 +50,6 @@ public class CalendarManager {
   public Calendar getCalendar(String name) {
     return calendars.get(name);
   }
+
+
 }
