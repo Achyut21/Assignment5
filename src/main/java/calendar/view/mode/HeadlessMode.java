@@ -3,27 +3,26 @@ package calendar.view.mode;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Scanner;
 
 import calendar.controller.CalendarController;
 import calendar.controller.command.Command;
 import calendar.controller.command.CommandFactory;
-import calendar.view.ConsoleView;
 
 public class HeadlessMode implements Mode {
-  private final ConsoleView view;
   private final String filePath;
 
   //TODO: Decouple This
   private final CalendarController controller;
 
-  public HeadlessMode(String filePath, ConsoleView view, CalendarController controller) {
-    this.view = view;
+  public HeadlessMode(String filePath, CalendarController controller) {
     this.filePath = filePath;
     this.controller = controller;
   }
 
   @Override
   public void execute() {
+    Scanner scanner = new Scanner(System.in);
     try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
       String line;
       int lineNo = 1;
@@ -32,24 +31,24 @@ public class HeadlessMode implements Mode {
           lineNo++;
           continue;
         }
-        view.display("Processing command (" + lineNo + "): " + line);
+        System.out.println("Processing command (" + lineNo + "): " + line);
         if (line.equalsIgnoreCase("exit")) {
-          view.display("Exiting Calendar App.");
+          System.out.println("Exiting Calendar App.");
           break;
         }
         try {
           Command command = CommandFactory.process(line, controller);
           String output = command.execute();
-          view.display(output);
+          System.out.println(output);
         }
         catch (Exception e) {
-          view.display("Error at line " + lineNo + ": " + e.getMessage());
+          System.out.println("Error at line " + lineNo + ": " + e.getMessage());
           break;
         }
         lineNo++;
       }
     } catch (IOException e) {
-      view.display("Headless mode terminated due to error: " + e.getMessage());
+      System.out.println("Headless mode terminated due to error: " + e.getMessage());
     }
   }
 

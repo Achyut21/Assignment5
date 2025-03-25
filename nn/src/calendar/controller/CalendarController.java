@@ -5,7 +5,7 @@ import calendar.model.Event;
 import calendar.model.SingleEvent;
 import calendar.model.RecurringEvent;
 import calendar.util.CommandProcessor;
-import calendar.view.ConsoleView;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
