@@ -1,4 +1,4 @@
-package calendar.exceptions;
+package calendar.view.exceptions;
 
 /** Thrown when a required parameter is missing. */
 public class MissingParameterException extends Exception {

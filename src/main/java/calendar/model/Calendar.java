@@ -6,6 +6,9 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
+import calendar.model.event.AbstractCalendarEvent;
+import calendar.model.event.Event;
+
 /** Represents a calendar containing events with a unique name and timezone. */
 public class Calendar {
   private List<Event> events = new ArrayList<>();

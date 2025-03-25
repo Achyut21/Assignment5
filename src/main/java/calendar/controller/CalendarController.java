@@ -1,21 +1,15 @@
 package calendar.controller;
 
 import calendar.controller.manager.CalendarManager;
-import calendar.export.CSVCalendarExporter;
-import calendar.export.CalendarExporter;
+import calendar.controller.export.CSVCalendarExporter;
+import calendar.controller.export.CalendarExporter;
 import calendar.model.Calendar;
-import calendar.model.Event;
-import calendar.model.SingleEvent;
-import calendar.model.RecurringEvent;
-import calendar.util.CommandProcessor;
-import calendar.view.ConsoleView;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import calendar.model.event.Event;
+import calendar.model.event.SingleEvent;
+import calendar.model.event.RecurringEvent;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.List;
@@ -365,85 +359,4 @@ public class CalendarController {
     }
   }
 
-  /**
-   * Runs the command processing loop.
-   */
-  public void run() {
-    ConsoleView view = new ConsoleView();
-    while (true) {
-      view.display("Choose mode: 1 for Interactive, 2 for Headless and 3 to Exit");
-      String mode = view.getInput();
-      switch (mode) {
-        case "1": {
-          view.display("Interactive mode.");
-          processInteractive(view);
-          break;
-        }
-        case "2": {
-          view.display("Enter commands file path:");
-          String filePath = view.getInput();
-          processHeadless(filePath, view);
-          break;
-        }
-        case "3": {
-          view.display("Exiting Calendar App.");
-          return;
-        }
-        default: {
-          view.display("Invalid command.");
-          break;
-        }
-      }
-    }
-  }
-
-  /**
-   * Processes commands in interactive mode.
-   */
-  private void processInteractive(ConsoleView view) {
-    while (true) {
-      String input = view.getInput();
-      if (input.equalsIgnoreCase("exit")) {
-        view.display("Exiting Calendar App.");
-        break;
-      }
-      try {
-        String output = CommandProcessor.process(input, this);
-        view.display(output);
-      } catch (Exception e) {
-        view.display("Error: " + e.getMessage());
-      }
-    }
-  }
-
-  /**
-   * Processes commands in headless mode from a file.
-   */
-  private void processHeadless(String filePath, ConsoleView view) {
-    try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-      String line;
-      int lineNo = 1;
-      while ((line = reader.readLine()) != null) {
-        if (line.trim().isEmpty()) {
-          lineNo++;
-          continue;
-        }
-        view.display("Processing command (" + lineNo + "): " + line);
-        if (line.equalsIgnoreCase("exit")) {
-          view.display("Exiting Calendar App.");
-          break;
-        }
-        try {
-          String output = CommandProcessor.process(line, this);
-          view.display(output);
-        } catch (Exception e) {
-          view.display("Error at line " + lineNo + ": " + e.getMessage());
-          break;
-        }
-        lineNo++;
-      }
-    } catch (IOException e) {
-      view.display("Headless mode terminated due to error: " + e.getMessage());
-    }
-  }
 }

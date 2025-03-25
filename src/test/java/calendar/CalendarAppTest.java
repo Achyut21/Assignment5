@@ -6,12 +6,13 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import calendar.controller.CalendarController;
-import calendar.exceptions.InvalidCommandException;
-import calendar.exceptions.InvalidTokenException;
-import calendar.exceptions.MissingParameterException;
+import calendar.controller.command.Command;
+import calendar.view.exceptions.InvalidCommandException;
+import calendar.view.exceptions.InvalidTokenException;
+import calendar.view.exceptions.MissingParameterException;
 import calendar.model.Calendar;
-import calendar.model.SingleEvent;
-import calendar.util.CommandProcessor;
+import calendar.model.event.SingleEvent;
+import calendar.controller.command.CommandFactory;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -350,7 +351,8 @@ public class CalendarAppTest {
   @Test
   public void testCommandProcessorCreateSingle() throws Exception {
     String cmd = "create event Meeting from 2025-04-15T10:00 to 2025-04-15T11:00 --autodecline";
-    String result = CommandProcessor.process(cmd, controller);
+    Command command = CommandFactory.process(cmd, controller);
+    String result = command.execute();
     assertTrue(result.contains("Single timed event created"));
   }
 
@@ -362,7 +364,8 @@ public class CalendarAppTest {
     String cmd =
         "edit event description EditTest from 2025-04-16T10:00 to 2025-04-16T11:00 with "
             + "UpdatedDesc";
-    String result = CommandProcessor.process(cmd, controller);
+        Command command = CommandFactory.process(cmd, controller);
+    String result = command.execute();
     assertTrue(result.contains("Single event edited"));
   }
 
@@ -372,7 +375,8 @@ public class CalendarAppTest {
     controller.createSingleEvent(
         "PrintTest", "2025-04-17T09:00", "2025-04-17T10:00", "", "", true, false);
     String cmd = "print events on 2025-04-17";
-    String result = CommandProcessor.process(cmd, controller);
+        Command command = CommandFactory.process(cmd, controller);
+    String result = command.execute();
     assertTrue(result.contains("PrintTest"));
   }
 
@@ -382,7 +386,8 @@ public class CalendarAppTest {
     controller.createSingleEvent(
         "ExportTest", "2025-04-18T09:00", "2025-04-18T10:00", "Desc", "Loc", true, false);
     String cmd = "export cal test_export_cmd.csv";
-    String result = CommandProcessor.process(cmd, controller);
+        Command command = CommandFactory.process(cmd, controller);
+    String result = command.execute();
     assertTrue(result.contains("Calendar exported to CSV at:"));
     new File("test_export_cmd.csv").delete();
   }
@@ -393,7 +398,8 @@ public class CalendarAppTest {
     controller.createSingleEvent(
         "ShowTest", "2025-04-19T14:00", "2025-04-19T15:00", "", "", true, false);
     String cmd = "show status on 2025-04-19T14:30";
-    String result = CommandProcessor.process(cmd, controller);
+        Command command = CommandFactory.process(cmd, controller);
+    String result = command.execute();
     assertTrue(result.contains("Busy"));
   }
 
@@ -401,21 +407,23 @@ public class CalendarAppTest {
   @Test(expected = InvalidCommandException.class)
   public void testCommandProcessorInvalidCommand() throws Exception {
     String cmd = "invalid command";
-    CommandProcessor.process(cmd, controller);
+    CommandFactory.process(cmd, controller);
   }
 
   /** Tests CommandProcessor missing parameter. */
   @Test(expected = MissingParameterException.class)
   public void testCommandProcessorMissingParameter() throws Exception {
     String cmd = "create event";
-    CommandProcessor.process(cmd, controller);
+    Command command = CommandFactory.process(cmd, controller);
+    command.execute();
   }
 
   /** Tests CommandProcessor invalid token. */
   @Test(expected = InvalidTokenException.class)
   public void testCommandProcessorInvalidToken() throws Exception {
     String cmd = "create event Meeting from 2025-04-20T10:00 2025-04-20T11:00 --autodecline";
-    CommandProcessor.process(cmd, controller);
+    Command command = CommandFactory.process(cmd, controller);
+    command.execute();
   }
 
   /** Tests CommandProcessor invalid recurring specification. */
@@ -423,13 +431,15 @@ public class CalendarAppTest {
   public void testCommandProcessorInvalidRecurringSpecification() throws Exception {
     String cmd =
         "create event Meeting from 2025-04-21T10:00 to 2025-04-21T11:00 repeats MTW invalid";
-    CommandProcessor.process(cmd, controller);
+    Command command = CommandFactory.process(cmd, controller);
+    command.execute();
   }
 
   @Test
   public void testCreateSingleEventCommand() throws Exception {
     String cmd = "create event Meeting from 2025-05-01T10:00 to 2025-05-01T11:00 --autodecline";
-    String result = CommandProcessor.process(cmd, controller);
+        Command command = CommandFactory.process(cmd, controller);
+    String result = command.execute();
     assertTrue(result.contains("Single timed event created: Meeting"));
   }
 
@@ -437,7 +447,8 @@ public class CalendarAppTest {
   @Test
   public void testCreateRecurringEventOccurrencesCommand() throws Exception {
     String cmd = "create event Yoga from 2025-05-01T08:00 to 2025-05-01T09:00 repeats MTW for 3 times --autodecline";
-    String result = CommandProcessor.process(cmd, controller);
+        Command command = CommandFactory.process(cmd, controller);
+    String result = command.execute();
     assertTrue(result.contains("Recurring timed event created with 3 occurrences."));
   }
 
@@ -445,7 +456,8 @@ public class CalendarAppTest {
   @Test
   public void testCreateRecurringEventUntilCommand() throws Exception {
     String cmd = "create event Class from 2025-05-01T09:00 to 2025-05-01T10:00 repeats T until 2025-05-15T00:00 --autodecline";
-    String result = CommandProcessor.process(cmd, controller);
+        Command command = CommandFactory.process(cmd, controller);
+    String result = command.execute();
     assertTrue(result.contains("Recurring timed event created until 2025-05-15T00:00"));
   }
 
@@ -453,7 +465,8 @@ public class CalendarAppTest {
   @Test
   public void testCreateSingleAllDayEventCommand() throws Exception {
     String cmd = "create event Holiday on 2025-05-10 --autodecline";
-    String result = CommandProcessor.process(cmd, controller);
+        Command command = CommandFactory.process(cmd, controller);
+    String result = command.execute();
     assertTrue(result.contains("Single all day event created: Holiday"));
   }
 
@@ -461,7 +474,8 @@ public class CalendarAppTest {
   @Test
   public void testCreateRecurringAllDayEventOccurrencesCommand() throws Exception {
     String cmd = "create event Holiday on 2025-05-10 repeats MTW for 2 times";
-    String result = CommandProcessor.process(cmd, controller);
+        Command command = CommandFactory.process(cmd, controller);
+    String result = command.execute();
     assertTrue(result.contains("Recurring all day event created with 2 occurrences."));
   }
 
@@ -469,63 +483,77 @@ public class CalendarAppTest {
   @Test
   public void testCreateRecurringAllDayEventUntilCommand() throws Exception {
     String cmd = "create event Festival on 2025-05-05 repeats F until 2025-05-20";
-    String result = CommandProcessor.process(cmd, controller);
+        Command command = CommandFactory.process(cmd, controller);
+    String result = command.execute();
     assertTrue(result.contains("Recurring all day event created until 2025-05-20"));
   }
 
   /** Tests editing a single event command. */
   @Test
   public void testEditSingleEventCommand() throws Exception {
-    CommandProcessor.process("create event Meeting from 2025-05-01T10:00 to 2025-05-01T11:00 --autodecline", controller);
+    Command command = CommandFactory.process("create event Meeting from 2025-05-01T10:00 to 2025-05-01T11:00 --autodecline", controller);
+    command.execute();
     String editCmd = "edit event description Meeting from 2025-05-01T10:00 to 2025-05-01T11:00 with UpdatedDesc";
-    String result = CommandProcessor.process(editCmd, controller);
+    command = CommandFactory.process(editCmd, controller);
+    String result = command.execute();
     assertTrue(result.contains("Single event edited."));
   }
 
   /** Tests editing events from a specified date-time command. */
   @Test
   public void testEditEventsFromCommand() throws Exception {
-    CommandProcessor.process("create event Workshop from 2025-05-02T14:00 to 2025-05-02T15:00 --autodecline", controller);
-    CommandProcessor.process("create event Workshop from 2025-05-02T14:00 to 2025-05-02T15:00 --autodecline", controller);
+    Command command = CommandFactory.process("create event Workshop from 2025-05-02T14:00 to 2025-05-02T15:00 --autodecline", controller);
+    command.execute();
+    command = CommandFactory.process("create event Workshop from 2025-05-02T14:00 to 2025-05-02T15:00 --autodecline", controller);
+    command.execute();
     String editCmd = "edit events description Workshop from 2025-05-02T14:00 with UpdatedWorkshop";
-    String result = CommandProcessor.process(editCmd, controller);
+    command = CommandFactory.process(editCmd, controller);
+    String result = command.execute();
     assertTrue(result.contains("Events starting at 2025-05-02T14:00 edited."));
   }
 
   /** Tests bulk editing events command. */
   @Test
   public void testEditEventsCommand() throws Exception {
-    CommandProcessor.process("create event Seminar from 2025-05-03T09:00 to 2025-05-03T10:00 --autodecline", controller);
-    CommandProcessor.process("create event Seminar from 2025-05-03T11:00 to 2025-05-03T12:00 --autodecline", controller);
+    Command command = CommandFactory.process("create event Seminar from 2025-05-03T09:00 to 2025-05-03T10:00 --autodecline", controller);
+    command.execute();
+    command = CommandFactory.process("create event Seminar from 2025-05-03T11:00 to 2025-05-03T12:00 --autodecline", controller);
+    command.execute();
     String editCmd = "edit events description Seminar NewDesc";
-    String result = CommandProcessor.process(editCmd, controller);
+    command = CommandFactory.process(editCmd, controller);
+    String result = command.execute();
     assertTrue(result.contains("All events with name Seminar edited."));
   }
 
   /** Tests printing events on a specific date command. */
   @Test
   public void testPrintEventsOnCommand() throws Exception {
-    CommandProcessor.process("create event Meeting from 2025-05-04T10:00 to 2025-05-04T11:00 --autodecline", controller);
+    Command command = CommandFactory.process("create event Meeting from 2025-05-04T10:00 to 2025-05-04T11:00 --autodecline", controller);
+    command.execute();
     String printCmd = "print events on 2025-05-04";
-    String result = CommandProcessor.process(printCmd, controller);
+    command = CommandFactory.process(printCmd, controller);
+    String result = command.execute();
     assertTrue(result.contains("Meeting"));
   }
 
   /** Tests printing events between two date-times command. */
   @Test
   public void testPrintEventsBetweenCommand() throws Exception {
-    CommandProcessor.process("create event Call from 2025-05-06T15:00 to 2025-05-06T16:00 --autodecline", controller);
+    Command command = CommandFactory.process("create event Call from 2025-05-06T15:00 to 2025-05-06T16:00 --autodecline", controller);
+    command.execute();
     String printCmd = "print events from 2025-05-06T14:00 to 2025-05-06T17:00";
-    String result = CommandProcessor.process(printCmd, controller);
+    command = CommandFactory.process(printCmd, controller);
+    String result = command.execute();
     assertTrue(result.contains("Call"));
   }
 
   /** Tests exporting the calendar to a CSV file command. */
   @Test
   public void testExportCalendarCommand() throws Exception {
-    CommandProcessor.process("create event ExportTest from 2025-05-07T09:00 to 2025-05-07T10:00 --autodecline", controller);
+    CommandFactory.process("create event ExportTest from 2025-05-07T09:00 to 2025-05-07T10:00 --autodecline", controller);
     String exportCmd = "export cal test_export.csv";
-    String result = CommandProcessor.process(exportCmd, controller);
+    Command command = CommandFactory.process(exportCmd, controller);
+    String result = command.execute();
     assertTrue(result.contains("Calendar exported to CSV at:"));
     Files.deleteIfExists(Paths.get("test_export.csv"));
   }
@@ -533,9 +561,11 @@ public class CalendarAppTest {
   /** Tests showing busy status command. */
   @Test
   public void testShowStatusCommand() throws Exception {
-    CommandProcessor.process("create event BusyTest from 2025-05-08T13:00 to 2025-05-08T14:00 --autodecline", controller);
+    Command command = CommandFactory.process("create event BusyTest from 2025-05-08T13:00 to 2025-05-08T14:00 --autodecline", controller);
+    command.execute();
     String showCmd = "show status on 2025-05-08T13:30";
-    String result = CommandProcessor.process(showCmd, controller);
+    command = CommandFactory.process(showCmd, controller);
+    String result = command.execute();
     assertTrue(result.contains("Busy"));
   }
 
@@ -543,56 +573,72 @@ public class CalendarAppTest {
   @Test
   public void testCreateCalendarCommand() throws Exception {
     String cmd = "create calendar --name WorkCalendar --timezone America/New_York";
-    String result = CommandProcessor.process(cmd, controller);
+        Command command = CommandFactory.process(cmd, controller);
+    String result = command.execute();
     assertTrue(result.contains("Calendar created: WorkCalendar"));
   }
 
   /** Tests editing a calendar command. */
   @Test
   public void testEditCalendarCommand() throws Exception {
-    CommandProcessor.process("create calendar --name TestCal --timezone America/New_York", controller);
+    Command command = CommandFactory.process("create calendar --name TestCal --timezone America/New_York", controller);
+    command.execute();
     String editCmd = "edit calendar --name TestCal --property timezone Europe/Paris";
-    String result = CommandProcessor.process(editCmd, controller);
+    command = CommandFactory.process(editCmd, controller);
+    String result = command.execute();
     assertTrue(result.contains("Calendar TestCal updated: timezone = Europe/Paris"));
   }
 
   /** Tests using a calendar command. */
   @Test
   public void testUseCalendarCommand() throws Exception {
-    CommandProcessor.process("create calendar --name NewCal --timezone Asia/Kolkata", controller);
+    Command command = CommandFactory.process("create calendar --name NewCal --timezone Asia/Kolkata", controller);
+    command.execute();
     String useCmd = "use calendar --name NewCal";
-    String result = CommandProcessor.process(useCmd, controller);
+    command = CommandFactory.process(useCmd, controller);
+    String result = command.execute();
     assertTrue(result.contains("Using calendar: NewCal"));
   }
 
   /** Tests copying a single event command. */
   @Test
   public void testCopyEventCommand() throws Exception {
-    CommandProcessor.process("create event CopyTest from 2025-05-09T10:00 to 2025-05-09T11:00 --autodecline", controller);
-    CommandProcessor.process("create calendar --name TargetCal --timezone Europe/London", controller);
+    Command command = CommandFactory.process("create event CopyTest from 2025-05-09T10:00 to 2025-05-09T11:00 --autodecline", controller);
+    command.execute();
+    command = CommandFactory.process("create calendar --name TargetCal --timezone Europe/London", controller);
+    command.execute();
     String copyCmd = "copy event CopyTest on 2025-05-09T10:00 --target TargetCal to 2025-05-10T10:00";
-    String result = CommandProcessor.process(copyCmd, controller);
+    command = CommandFactory.process(copyCmd, controller);
+    String result = command.execute();
     assertTrue(result.contains("Event CopyTest copied to calendar TargetCal"));
   }
 
   /** Tests copying all events on a specific day command. */
   @Test
   public void testCopyEventsOnCommand() throws Exception {
-    CommandProcessor.process("create event DayEvent on 2025-05-10 --autodecline", controller);
-    CommandProcessor.process("create calendar --name TargetCal2 --timezone Europe/London", controller);
+    Command command = CommandFactory.process("create event DayEvent on 2025-05-10 --autodecline", controller);
+    command.execute();
+    command = CommandFactory.process("create calendar --name TargetCal2 --timezone Europe/London", controller);
+    command.execute();
     String copyCmd = "copy events on 2025-05-10 --target TargetCal2 to 2025-05-11T00:00";
-    String result = CommandProcessor.process(copyCmd, controller);
+    command = CommandFactory.process(copyCmd, controller);
+    String result = command.execute();
     assertTrue(result.contains("copied"));
   }
 
   /** Tests copying events between two dates command. */
   @Test
   public void testCopyEventsBetweenCommand() throws Exception {
-    CommandProcessor.process("create event IntervalEvent1 from 2025-05-12T09:00 to 2025-05-12T10:00 --autodecline", controller);
-    CommandProcessor.process("create event IntervalEvent2 from 2025-05-12T11:00 to 2025-05-12T12:00 --autodecline", controller);
-    CommandProcessor.process("create calendar --name TargetCal3 --timezone Asia/Tokyo", controller);
+    Command command = CommandFactory.process("create event IntervalEvent1 from 2025-05-12T09:00 to 2025-05-12T10:00 --autodecline", controller);
+    command.execute();
+    command = CommandFactory.process("create event IntervalEvent2 from 2025-05-12T11:00 to 2025-05-12T12:00 --autodecline", controller);
+    command.execute();
+    command = CommandFactory.process("create calendar --name TargetCal3 --timezone Asia/Tokyo", controller);
+    command.execute();
+
     String copyCmd = "copy events between 2025-05-12 and 2025-05-12 --target TargetCal3 to 2025-05-13";
-    String result = CommandProcessor.process(copyCmd, controller);
+    command = CommandFactory.process(copyCmd, controller);
+    String result = command.execute();
     assertTrue(result.contains("copied"));
   }
 }

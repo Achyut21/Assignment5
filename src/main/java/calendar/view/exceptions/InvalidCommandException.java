@@ -1,4 +1,4 @@
-package calendar.exceptions;
+package calendar.view.exceptions;
 
 /** Thrown when a command is invalid. */
 public class InvalidCommandException extends Exception {

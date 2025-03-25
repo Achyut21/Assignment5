@@ -1,4 +1,4 @@
-package calendar.model;
+package calendar.model.event;
 
 import java.time.LocalDateTime;
 

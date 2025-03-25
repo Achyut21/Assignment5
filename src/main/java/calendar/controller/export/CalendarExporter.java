@@ -1,4 +1,4 @@
-package calendar.export;
+package calendar.controller.export;
 
 /**
  * Interface for exporting a calendar to a file.

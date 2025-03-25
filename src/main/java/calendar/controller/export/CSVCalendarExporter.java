@@ -1,7 +1,7 @@
-package calendar.export;
+package calendar.controller.export;
 
 import calendar.model.Calendar;
-import calendar.model.Event;
+import calendar.model.event.Event;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
