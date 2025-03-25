@@ -17,23 +17,151 @@ public class CommandProcessor {
     String commandType = tokens[0].toLowerCase();
     switch (commandType) {
       case "create":
+        if (tokens[1].equalsIgnoreCase("calendar")) {
+          return processCreateCalendar(tokens, controller);
+        }
         return processCreate(tokens, controller);
       case "edit":
+        if (tokens[1].equalsIgnoreCase("calendar")) {
+          return processEditCalendar(tokens, controller);
+        }
         return processEdit(tokens, controller);
+      case "use":
+        return processUseCalendar(tokens, controller);
+      case "copy":
+        return processCopy(tokens, controller);
       case "print":
         return processPrint(tokens, controller);
       case "export":
         return processExport(tokens, controller);
       case "show":
         return processShow(tokens, controller);
-      default:
+      default: {
         throw new InvalidCommandException(commandType);
+      }
     }
   }
 
-  /** Processes a create command with the provided tokens. */
-  private static String processCreate(String[] tokens, CalendarController controller)
-      throws Exception {
+  /** Processes a create calendar command. */
+  private static String processCreateCalendar(String[] tokens, CalendarController controller) throws Exception {
+    int index = 2;
+    if (!tokens[index].equalsIgnoreCase("--name")) {
+      throw new MissingParameterException("calendar name");
+    }
+    index++;
+    String calName = tokens[index++];
+    if (!tokens[index].equalsIgnoreCase("--timezone")) {
+      throw new MissingParameterException("timezone");
+    }
+    index++;
+    String timezone = tokens[index++];
+    controller.createCalendar(calName, timezone);
+    return "Calendar created: " + calName + " with timezone " + timezone;
+  }
+
+  /** Processes an edit calendar command. */
+  private static String processEditCalendar(String[] tokens, CalendarController controller) throws Exception {
+    int index = 2;
+    if (!tokens[index].equalsIgnoreCase("--name")) {
+      throw new MissingParameterException("calendar name");
+    }
+    index++;
+    String calName = tokens[index++];
+    if (!tokens[index].equalsIgnoreCase("--property")) {
+      throw new MissingParameterException("property");
+    }
+    index++;
+    String property = tokens[index++];
+    String newValue = tokens[index++];
+    controller.editCalendar(calName, property, newValue);
+    return "Calendar " + calName + " updated: " + property + " = " + newValue;
+  }
+
+  /** Processes a use calendar command. */
+  private static String processUseCalendar(String[] tokens, CalendarController controller) throws Exception {
+    int index = 1;
+    if (!tokens[index].equalsIgnoreCase("calendar")) {
+      throw new MissingParameterException("calendar");
+    }
+    index++;
+    if (!tokens[index].equalsIgnoreCase("--name")) {
+      throw new MissingParameterException("calendar name");
+    }
+    index++;
+    String calName = tokens[index++];
+    controller.useCalendar(calName);
+    return "Using calendar: " + calName;
+  }
+
+  /** Processes a copy command with the provided tokens. */
+  private static String processCopy(String[] tokens, CalendarController controller) throws Exception {
+    int index = 1;
+    if (tokens[index].equalsIgnoreCase("event")) {
+      index++;
+      String eventName = tokens[index++];
+      if (!tokens[index].equalsIgnoreCase("on")) {
+        throw new MissingParameterException("on");
+      }
+      index++;
+      String sourceDateTime = tokens[index++];
+      if (!tokens[index].equalsIgnoreCase("--target")) {
+        throw new MissingParameterException("target calendar");
+      }
+      index++;
+      String targetCal = tokens[index++];
+      if (!tokens[index].equalsIgnoreCase("to")) {
+        throw new MissingParameterException("to");
+      }
+      index++;
+      String targetDateTime = tokens[index++];
+      controller.copyEvent(eventName, sourceDateTime, targetCal, targetDateTime);
+      return "Event " + eventName + " copied to calendar " + targetCal + ".";
+    } else if (tokens[index].equalsIgnoreCase("events")) {
+      index++;
+      if (tokens[index].equalsIgnoreCase("on")) {
+        index++;
+        String date = tokens[index++];
+        if (!tokens[index].equalsIgnoreCase("--target")) {
+          throw new MissingParameterException("target calendar");
+        }
+        index++;
+        String targetCal = tokens[index++];
+        if (!tokens[index].equalsIgnoreCase("to")) {
+          throw new MissingParameterException("to");
+        }
+        index++;
+        String targetDateTime = tokens[index++];
+        controller.copyEventsOn(date, targetCal, targetDateTime);
+        return "Events on " + date + " copied to calendar " + targetCal + ".";
+      } else if (tokens[index].equalsIgnoreCase("between")) {
+        index++;
+        String startDate = tokens[index++];
+        if (!tokens[index].equalsIgnoreCase("and")) {
+          throw new MissingParameterException("and");
+        }
+        index++;
+        String endDate = tokens[index++];
+        if (!tokens[index].equalsIgnoreCase("--target")) {
+          throw new MissingParameterException("target calendar");
+        }
+        index++;
+        String targetCal = tokens[index++];
+        if (!tokens[index].equalsIgnoreCase("to")) {
+          throw new MissingParameterException("to");
+        }
+        index++;
+        String targetDate = tokens[index++];
+        controller.copyEventsBetween(startDate, endDate, targetCal, targetDate);
+        return "Events between " + startDate + " and " + endDate + " copied to calendar " + targetCal + ".";
+      } else {
+        throw new InvalidCommandException("copy");
+      }
+    }
+    throw new InvalidCommandException("copy");
+  }
+
+  /** Processes a create event command with the provided tokens. */
+  private static String processCreate(String[] tokens, CalendarController controller) throws Exception {
     if (tokens.length < 3 || !tokens[1].equalsIgnoreCase("event")) {
       throw new MissingParameterException("event");
     }
@@ -85,15 +213,7 @@ public class CommandProcessor {
           }
           index++;
           controller.createRecurringEventOccurrences(
-              eventName,
-              startDateTime,
-              endDateTime,
-              "",
-              "",
-              true,
-              weekdays,
-              occurrences,
-              autoDecline);
+              eventName, startDateTime, endDateTime, "", "", true, weekdays, occurrences, autoDecline);
           return "Recurring timed event created with " + occurrences + " occurrences.";
         } else if (recurringType.equals("until")) {
           if (index >= tokens.length) {
@@ -101,22 +221,13 @@ public class CommandProcessor {
           }
           String untilDateTime = tokens[index++];
           controller.createRecurringEventUntil(
-              eventName,
-              startDateTime,
-              endDateTime,
-              "",
-              "",
-              true,
-              weekdays,
-              untilDateTime,
-              autoDecline);
+              eventName, startDateTime, endDateTime, "", "", true, weekdays, untilDateTime, autoDecline);
           return "Recurring timed event created until " + untilDateTime + ".";
         } else {
           throw new InvalidCommandException("Recurring specification: " + recurringType);
         }
       } else {
-        controller.createSingleEvent(
-            eventName, startDateTime, endDateTime, "", "", true, autoDecline);
+        controller.createSingleEvent(eventName, startDateTime, endDateTime, "", "", true, autoDecline);
         return "Single timed event created: " + eventName;
       }
     } else if (mode.equals("on")) {
@@ -168,8 +279,7 @@ public class CommandProcessor {
   }
 
   /** Processes an edit command with the provided tokens. */
-  private static String processEdit(String[] tokens, CalendarController controller)
-      throws Exception {
+  private static String processEdit(String[] tokens, CalendarController controller) throws Exception {
     if (tokens.length < 2) {
       throw new MissingParameterException("edit command");
     }
@@ -216,8 +326,7 @@ public class CommandProcessor {
   }
 
   /** Processes a print command with the provided tokens. */
-  private static String processPrint(String[] tokens, CalendarController controller)
-      throws Exception {
+  private static String processPrint(String[] tokens, CalendarController controller) throws Exception {
     if (tokens.length < 3) {
       throw new MissingParameterException("print command");
     }
@@ -243,8 +352,7 @@ public class CommandProcessor {
   }
 
   /** Processes an export command with the provided tokens. */
-  private static String processExport(String[] tokens, CalendarController controller)
-      throws Exception {
+  private static String processExport(String[] tokens, CalendarController controller) throws Exception {
     if (tokens.length < 3 || !tokens[1].equalsIgnoreCase("cal")) {
       throw new InvalidCommandException("export command must be 'export cal <filename>'");
     }
@@ -254,11 +362,8 @@ public class CommandProcessor {
   }
 
   /** Processes a show command with the provided tokens. */
-  private static String processShow(String[] tokens, CalendarController controller)
-      throws Exception {
-    if (tokens.length < 4
-        || !tokens[1].equalsIgnoreCase("status")
-        || !tokens[2].equalsIgnoreCase("on")) {
+  private static String processShow(String[] tokens, CalendarController controller) throws Exception {
+    if (tokens.length < 4 || !tokens[1].equalsIgnoreCase("status") || !tokens[2].equalsIgnoreCase("on")) {
       throw new InvalidCommandException("show status command must be 'show status on <datetime>'");
     }
     String dateTime = tokens[3];

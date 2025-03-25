@@ -1,18 +1,53 @@
 package calendar.model;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Represents a calendar containing events. */
+/** Represents a calendar containing events with a unique name and timezone. */
 public class Calendar {
   private List<Event> events = new ArrayList<>();
+  private String name;
+  private ZoneId timezone;
+
+  /** Constructs a Calendar with the specified name and timezone. */
+  public Calendar(String name, ZoneId timezone) {
+    this.name = name;
+    this.timezone = timezone;
+  }
+
+  /** Returns the calendar name. */
+  public String getName() {
+    return name;
+  }
+
+  /** Returns the calendar timezone. */
+  public ZoneId getTimezone() {
+    return timezone;
+  }
+
+  /** Sets the calendar name. */
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  /** Sets the calendar timezone using the IANA timezone ID. */
+  public void setTimezone(String timezone) {
+    this.timezone = ZoneId.of(timezone);
+  }
+
+  /** Edits a property of the calendar. */
+  public void editProperty(String property, String newValue) throws Exception {
+    if ("name".equalsIgnoreCase(property)) {
+      this.name = newValue;
+    } else if ("timezone".equalsIgnoreCase(property)) {
+      this.timezone = ZoneId.of(newValue);
+    } else {
+      throw new Exception("Invalid calendar property: " + property);
+    }
+  }
 
   /** Adds an event to the calendar, checking conflicts if autoDecline is true. */
   public void addEvent(Event event, boolean autoDecline) throws Exception {
@@ -81,7 +116,8 @@ public class Calendar {
   public int editEventsFrom(String property, String name, LocalDateTime start, String newValue) {
     int count = 0;
     for (Event event : events) {
-      if (event.getName().equals(name) && event.getStart().equals(start)) {
+      if (event.getName().equals(name)
+          && (event.getStart().equals(start) || event.getStart().isAfter(start))) {
         updateProperty((AbstractCalendarEvent) event, property, newValue);
         count++;
       }
@@ -121,50 +157,13 @@ public class Calendar {
     }
   }
 
-  /** Exports the calendar to a CSV file formatted for Google Calendar. */
-  public String exportToCSV(String fileName) throws IOException {
-    String absPath = Paths.get(fileName).toAbsolutePath().toString();
-    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
-    DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
-    try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
-      writer.write(
-          "Subject,Start Date,Start Time,End Date,End Time,"
-              + "All Day Event,Description,Location,Private");
-      writer.newLine();
-      for (Event event : events) {
-        String subject = event.getName();
-        String startDate = dateFormatter.format(event.getStart());
-        String endDate = dateFormatter.format(event.getEnd());
-        String startTime = timeFormatter.format(event.getStart());
-        String endTime = timeFormatter.format(event.getEnd());
-        boolean isAllDay =
-            (event.getStart().getHour() == 0
-                && event.getStart().getMinute() == 0
-                && event.getEnd().getHour() == 23
-                && event.getEnd().getMinute() == 59);
-        String allDay = isAllDay ? "True" : "False";
-        if (isAllDay) {
-          startTime = "";
-          endTime = "";
-        }
-        String isPrivate = (!event.isPublic()) ? "True" : "False";
-        String description = event.getDescription();
-        String location = event.getLocation();
-        writer.write(
-            String.format(
-                "%s,%s,%s,%s,%s,%s,%s,%s,%s",
-                subject,
-                startDate,
-                startTime,
-                endDate,
-                endTime,
-                allDay,
-                description,
-                location,
-                isPrivate));
-        writer.newLine();
+  /** Finds an event by its name and start time. */
+  public Event findEventByNameAndStart(String eventName, LocalDateTime start) {
+    for (Event e : events) {
+      if (e.getName().equals(eventName) && e.getStart().equals(start)) {
+        return e;
       }
     }
-    return absPath;
+    return null;
   }
 }

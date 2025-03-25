@@ -15,7 +15,10 @@ import calendar.util.CommandProcessor;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -28,8 +31,8 @@ public class CalendarAppTest {
   /** Sets up test fixtures. */
   @Before
   public void setup() {
-    Calendar calendar = new Calendar();
-    controller = new CalendarController(calendar);
+    Calendar defaultCal = new Calendar("Default", ZoneId.of("America/New_York"));
+    controller = new CalendarController(defaultCal);
     event =
         new SingleEvent(
             "Test Event",
@@ -421,5 +424,175 @@ public class CalendarAppTest {
     String cmd =
         "create event Meeting from 2025-04-21T10:00 to 2025-04-21T11:00 repeats MTW invalid";
     CommandProcessor.process(cmd, controller);
+  }
+
+  @Test
+  public void testCreateSingleEventCommand() throws Exception {
+    String cmd = "create event Meeting from 2025-05-01T10:00 to 2025-05-01T11:00 --autodecline";
+    String result = CommandProcessor.process(cmd, controller);
+    assertTrue(result.contains("Single timed event created: Meeting"));
+  }
+
+  /** Tests creating a recurring timed event by occurrences command. */
+  @Test
+  public void testCreateRecurringEventOccurrencesCommand() throws Exception {
+    String cmd = "create event Yoga from 2025-05-01T08:00 to 2025-05-01T09:00 repeats MTW for 3 times --autodecline";
+    String result = CommandProcessor.process(cmd, controller);
+    assertTrue(result.contains("Recurring timed event created with 3 occurrences."));
+  }
+
+  /** Tests creating a recurring timed event until a specific date command. */
+  @Test
+  public void testCreateRecurringEventUntilCommand() throws Exception {
+    String cmd = "create event Class from 2025-05-01T09:00 to 2025-05-01T10:00 repeats T until 2025-05-15T00:00 --autodecline";
+    String result = CommandProcessor.process(cmd, controller);
+    assertTrue(result.contains("Recurring timed event created until 2025-05-15T00:00"));
+  }
+
+  /** Tests creating a single all-day event command. */
+  @Test
+  public void testCreateSingleAllDayEventCommand() throws Exception {
+    String cmd = "create event Holiday on 2025-05-10 --autodecline";
+    String result = CommandProcessor.process(cmd, controller);
+    assertTrue(result.contains("Single all day event created: Holiday"));
+  }
+
+  /** Tests creating a recurring all-day event by occurrences command. */
+  @Test
+  public void testCreateRecurringAllDayEventOccurrencesCommand() throws Exception {
+    String cmd = "create event Holiday on 2025-05-10 repeats MTW for 2 times";
+    String result = CommandProcessor.process(cmd, controller);
+    assertTrue(result.contains("Recurring all day event created with 2 occurrences."));
+  }
+
+  /** Tests creating a recurring all-day event until a specified date command. */
+  @Test
+  public void testCreateRecurringAllDayEventUntilCommand() throws Exception {
+    String cmd = "create event Festival on 2025-05-05 repeats F until 2025-05-20";
+    String result = CommandProcessor.process(cmd, controller);
+    assertTrue(result.contains("Recurring all day event created until 2025-05-20"));
+  }
+
+  /** Tests editing a single event command. */
+  @Test
+  public void testEditSingleEventCommand() throws Exception {
+    CommandProcessor.process("create event Meeting from 2025-05-01T10:00 to 2025-05-01T11:00 --autodecline", controller);
+    String editCmd = "edit event description Meeting from 2025-05-01T10:00 to 2025-05-01T11:00 with UpdatedDesc";
+    String result = CommandProcessor.process(editCmd, controller);
+    assertTrue(result.contains("Single event edited."));
+  }
+
+  /** Tests editing events from a specified date-time command. */
+  @Test
+  public void testEditEventsFromCommand() throws Exception {
+    CommandProcessor.process("create event Workshop from 2025-05-02T14:00 to 2025-05-02T15:00 --autodecline", controller);
+    CommandProcessor.process("create event Workshop from 2025-05-02T14:00 to 2025-05-02T15:00 --autodecline", controller);
+    String editCmd = "edit events description Workshop from 2025-05-02T14:00 with UpdatedWorkshop";
+    String result = CommandProcessor.process(editCmd, controller);
+    assertTrue(result.contains("Events starting at 2025-05-02T14:00 edited."));
+  }
+
+  /** Tests bulk editing events command. */
+  @Test
+  public void testEditEventsCommand() throws Exception {
+    CommandProcessor.process("create event Seminar from 2025-05-03T09:00 to 2025-05-03T10:00 --autodecline", controller);
+    CommandProcessor.process("create event Seminar from 2025-05-03T11:00 to 2025-05-03T12:00 --autodecline", controller);
+    String editCmd = "edit events description Seminar NewDesc";
+    String result = CommandProcessor.process(editCmd, controller);
+    assertTrue(result.contains("All events with name Seminar edited."));
+  }
+
+  /** Tests printing events on a specific date command. */
+  @Test
+  public void testPrintEventsOnCommand() throws Exception {
+    CommandProcessor.process("create event Meeting from 2025-05-04T10:00 to 2025-05-04T11:00 --autodecline", controller);
+    String printCmd = "print events on 2025-05-04";
+    String result = CommandProcessor.process(printCmd, controller);
+    assertTrue(result.contains("Meeting"));
+  }
+
+  /** Tests printing events between two date-times command. */
+  @Test
+  public void testPrintEventsBetweenCommand() throws Exception {
+    CommandProcessor.process("create event Call from 2025-05-06T15:00 to 2025-05-06T16:00 --autodecline", controller);
+    String printCmd = "print events from 2025-05-06T14:00 to 2025-05-06T17:00";
+    String result = CommandProcessor.process(printCmd, controller);
+    assertTrue(result.contains("Call"));
+  }
+
+  /** Tests exporting the calendar to a CSV file command. */
+  @Test
+  public void testExportCalendarCommand() throws Exception {
+    CommandProcessor.process("create event ExportTest from 2025-05-07T09:00 to 2025-05-07T10:00 --autodecline", controller);
+    String exportCmd = "export cal test_export.csv";
+    String result = CommandProcessor.process(exportCmd, controller);
+    assertTrue(result.contains("Calendar exported to CSV at:"));
+    Files.deleteIfExists(Paths.get("test_export.csv"));
+  }
+
+  /** Tests showing busy status command. */
+  @Test
+  public void testShowStatusCommand() throws Exception {
+    CommandProcessor.process("create event BusyTest from 2025-05-08T13:00 to 2025-05-08T14:00 --autodecline", controller);
+    String showCmd = "show status on 2025-05-08T13:30";
+    String result = CommandProcessor.process(showCmd, controller);
+    assertTrue(result.contains("Busy"));
+  }
+
+  /** Tests creating a new calendar command. */
+  @Test
+  public void testCreateCalendarCommand() throws Exception {
+    String cmd = "create calendar --name WorkCalendar --timezone America/New_York";
+    String result = CommandProcessor.process(cmd, controller);
+    assertTrue(result.contains("Calendar created: WorkCalendar"));
+  }
+
+  /** Tests editing a calendar command. */
+  @Test
+  public void testEditCalendarCommand() throws Exception {
+    CommandProcessor.process("create calendar --name TestCal --timezone America/New_York", controller);
+    String editCmd = "edit calendar --name TestCal --property timezone Europe/Paris";
+    String result = CommandProcessor.process(editCmd, controller);
+    assertTrue(result.contains("Calendar TestCal updated: timezone = Europe/Paris"));
+  }
+
+  /** Tests using a calendar command. */
+  @Test
+  public void testUseCalendarCommand() throws Exception {
+    CommandProcessor.process("create calendar --name NewCal --timezone Asia/Kolkata", controller);
+    String useCmd = "use calendar --name NewCal";
+    String result = CommandProcessor.process(useCmd, controller);
+    assertTrue(result.contains("Using calendar: NewCal"));
+  }
+
+  /** Tests copying a single event command. */
+  @Test
+  public void testCopyEventCommand() throws Exception {
+    CommandProcessor.process("create event CopyTest from 2025-05-09T10:00 to 2025-05-09T11:00 --autodecline", controller);
+    CommandProcessor.process("create calendar --name TargetCal --timezone Europe/London", controller);
+    String copyCmd = "copy event CopyTest on 2025-05-09T10:00 --target TargetCal to 2025-05-10T10:00";
+    String result = CommandProcessor.process(copyCmd, controller);
+    assertTrue(result.contains("Event CopyTest copied to calendar TargetCal"));
+  }
+
+  /** Tests copying all events on a specific day command. */
+  @Test
+  public void testCopyEventsOnCommand() throws Exception {
+    CommandProcessor.process("create event DayEvent on 2025-05-10 --autodecline", controller);
+    CommandProcessor.process("create calendar --name TargetCal2 --timezone Europe/London", controller);
+    String copyCmd = "copy events on 2025-05-10 --target TargetCal2 to 2025-05-11T00:00";
+    String result = CommandProcessor.process(copyCmd, controller);
+    assertTrue(result.contains("copied"));
+  }
+
+  /** Tests copying events between two dates command. */
+  @Test
+  public void testCopyEventsBetweenCommand() throws Exception {
+    CommandProcessor.process("create event IntervalEvent1 from 2025-05-12T09:00 to 2025-05-12T10:00 --autodecline", controller);
+    CommandProcessor.process("create event IntervalEvent2 from 2025-05-12T11:00 to 2025-05-12T12:00 --autodecline", controller);
+    CommandProcessor.process("create calendar --name TargetCal3 --timezone Asia/Tokyo", controller);
+    String copyCmd = "copy events between 2025-05-12 and 2025-05-12 --target TargetCal3 to 2025-05-13";
+    String result = CommandProcessor.process(copyCmd, controller);
+    assertTrue(result.contains("copied"));
   }
 }
