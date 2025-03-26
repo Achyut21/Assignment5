@@ -5,7 +5,7 @@ import calendar.view.exceptions.InvalidCommandException;
 import calendar.view.exceptions.InvalidTokenException;
 import calendar.view.exceptions.MissingParameterException;
 
-/** Processes commands for the calendar application. */
+/** Processes commands for the calendar application, returning an implementation of the Command class. */
 public class CommandFactory {
 
   /** Processes a command string using the given controller. */

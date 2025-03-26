@@ -6,7 +6,6 @@ import calendar.controller.CalendarController;
 
 public class ModeFactory {
 
-  //TODO: Decouple This
   private final CalendarController controller;
 
   public ModeFactory(CalendarController controller) {

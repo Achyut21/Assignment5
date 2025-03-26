@@ -7,9 +7,13 @@ This application is a command line based calendar system capable of creating and
 
 1. **CalendarApp (Main Entry Point)**
     - Instantiates the core `CalendarController`.
-    - Invokes `controller.run()` to start command processing.
+    - Invokes `modeFactory.getMode()` to select the appropriate mode.
+    - Calls `mode.execute()` to begin program execution
+   
+2. **ModeFactory**
+   - `getMode` parses a string and returns an implementation of the `Mode` interface
 
-2. **CalendarController**
+3. **CalendarController**
     - Maintains a reference to the core `Calendar` model.
     - Provides methods for:
         - Creating single or recurring events (timed or all-day).
@@ -18,14 +22,9 @@ This application is a command line based calendar system capable of creating and
         - Exporting events to CSV.
     - Interprets the user's chosen mode (interactive or headless) and delegates to the appropriate processing method (`processInteractive` or `processHeadless`).
 
-3. **ConsoleView**
-    - Handles console input and output.
-    - Displays prompts/messages and retrieves user commands in interactive mode.
-
-4. **CommandProcessor**
-    - Parses user commands (create, edit, print, export, show) and delegates to `CalendarController` methods.
-    - Validates required tokens, throws exceptions if tokens are missing or invalid.
-    - Ensures correct parameters are passed to the controller.
+4. **CommandFactory**
+    - Is responsible for parsing an input string and returning and implementation of the `Command` interface
+    - The returned `Command` implementation and execute the command by calling `Command.execute()`
 
 5. **Model Classes**
     - **Calendar**:
@@ -55,7 +54,9 @@ This application is a command line based calendar system capable of creating and
 
 2. **If Interactive**
     - Prompts the user to enter commands (e.g., `create event Meeting from 2025-04-01T10:00 to 2025-04-01T11:00 --autodecline`).
-    - Reads each command line via `ConsoleView`, then calls `CommandProcessor.process` to parse and delegate to the `CalendarController`.
+    - Reads each command line, then calls `CommandFactory` to parse and the string and return an implementation of the `Command` interface
+    - The returned command is executed by calling the `.execute()`
+    - This method then calls the appropriate `CalendarController` method(s).
     - Print or display results (e.g., event creation success messages or listing events).
     - Type `exit` to end the interactive session and return to the main mode prompt.
 
@@ -65,7 +66,9 @@ This application is a command line based calendar system capable of creating and
     - The application asks for a file path containing commands.
 
 2. **File-based Commands**
-    - Each line in the file is processed sequentially by `CommandProcessor`.
+    - Each line in the file is processed sequentially, sending each line to the `CommandFactory`.
+    - The `CommandFactory` returns an implementation of the `Command` class
+    - This `Command` then executes the command through the `.execute()` method
     - The final `exit` command stops execution.
 
 ### Common Commands Examples

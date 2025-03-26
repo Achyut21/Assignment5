@@ -12,7 +12,6 @@ import calendar.controller.command.CommandFactory;
 public class HeadlessMode implements Mode {
   private final String filePath;
 
-  //TODO: Decouple This
   private final CalendarController controller;
 
   public HeadlessMode(String filePath, CalendarController controller) {

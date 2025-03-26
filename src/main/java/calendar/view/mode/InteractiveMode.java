@@ -8,7 +8,6 @@ import calendar.controller.command.CommandFactory;
 
 public class InteractiveMode implements Mode {
 
-  //TODO: Decouple This
   private final CalendarController controller;
 
   public InteractiveMode(CalendarController controller) {
