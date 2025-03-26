@@ -84,3 +84,8 @@ This application is a command line based calendar system capable of creating and
   `show status on 2025-04-01T10:30`
 - **Export to CSV**  
   `export cal my_calendar.csv`
+
+### Distribution of Work
+For this assignment, Achyut primarily worked on implementing the functional parts of the rubric.
+Marcus did the refactoring and worked on implementing the factories as well as the testing. 
+However, both Marcus and Achyut spent much of the assignment in both in person working sessions and remote working sessions.
