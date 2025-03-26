@@ -1,6 +1,5 @@
-package calendar.view;
+package calendar.controller;
 
-import calendar.controller.CalendarController;
 import calendar.model.Calendar;
 import calendar.view.mode.Mode;
 import calendar.view.mode.ModeFactory;
