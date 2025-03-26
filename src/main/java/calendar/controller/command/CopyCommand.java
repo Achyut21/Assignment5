@@ -4,15 +4,19 @@ import calendar.controller.CalendarController;
 import calendar.view.exceptions.InvalidCommandException;
 import calendar.view.exceptions.MissingParameterException;
 
+/** Concrete implementation of the Copy command. */
 public class CopyCommand implements Command {
   private String[] tokens;
   private CalendarController controller;
 
+
+  /** Constructor for copy command. */
   public CopyCommand(String[] tokens, CalendarController controller) {
     this.tokens = tokens;
     this.controller = controller;
   }
 
+  /** Executes the copy command. */
   @Override
   public String execute() throws Exception {
     int index = 1;

@@ -5,15 +5,18 @@ import calendar.view.exceptions.InvalidCommandException;
 import calendar.view.exceptions.InvalidTokenException;
 import calendar.view.exceptions.MissingParameterException;
 
+/** Concrete implementation of the print command. */
 public class PrintCommand implements Command {
   private String[] tokens;
   private CalendarController controller;
 
+  /** Constructor for the print command. */
   public PrintCommand(String[] tokens, CalendarController controller) {
     this.tokens = tokens;
     this.controller = controller;
   }
 
+  /** Executes the print command. */
   @Override
   public String execute() throws Exception {
     if (tokens.length < 3) {

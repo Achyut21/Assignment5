@@ -9,16 +9,19 @@ import calendar.controller.CalendarController;
 import calendar.controller.command.Command;
 import calendar.controller.command.CommandFactory;
 
+/** Implementation of the Headless mode. */
 public class HeadlessMode implements Mode {
   private final String filePath;
 
   private final CalendarController controller;
 
+  /** Constructor for the headless mode. */
   public HeadlessMode(String filePath, CalendarController controller) {
     this.filePath = filePath;
     this.controller = controller;
   }
 
+  /** Method for executing the program in headless mode. */
   @Override
   public void execute() {
     Scanner scanner = new Scanner(System.in);

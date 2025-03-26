@@ -5,15 +5,18 @@ import calendar.view.exceptions.InvalidCommandException;
 import calendar.view.exceptions.InvalidTokenException;
 import calendar.view.exceptions.MissingParameterException;
 
+/** Concrete implementation of the edit command. */
 public class EditCommand implements Command {
   private String[] tokens;
   private CalendarController controller;
 
+  /** Constructor for the edit command. */
   public EditCommand(String[] tokens, CalendarController controller) {
     this.tokens = tokens;
     this.controller = controller;
   }
 
+  /** Executes the edit calendar command. */
   @Override
   public String execute() throws Exception {
     if (tokens[1].equalsIgnoreCase("calendar")) {

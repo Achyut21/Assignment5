@@ -8,7 +8,7 @@ import calendar.view.exceptions.MissingParameterException;
 /** Processes commands for the calendar application, returning an implementation of the Command class. */
 public class CommandFactory {
 
-  /** Processes a command string using the given controller. */
+  /** Processes a command string and return a concrete implementation of the Command interface */
   public static Command process(String input, CalendarController controller) throws Exception {
     String[] tokens = input.trim().split("\\s+");
 

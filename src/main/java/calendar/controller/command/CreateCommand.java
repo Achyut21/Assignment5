@@ -5,15 +5,18 @@ import calendar.view.exceptions.InvalidCommandException;
 import calendar.view.exceptions.InvalidTokenException;
 import calendar.view.exceptions.MissingParameterException;
 
+/** Concrete implementation of the create command. */
 public class CreateCommand implements Command {
   private String[] tokens;
   private CalendarController controller;
 
+  /** Constructor for the create command. */
   public CreateCommand(String[] tokens, CalendarController controller) {
     this.tokens = tokens;
     this.controller = controller;
   }
 
+  /** Executes the create calendar command. */
   @Override
   public String execute() throws Exception {
     if (tokens[1].equalsIgnoreCase("calendar")) {

@@ -3,15 +3,18 @@ package calendar.controller.command;
 import calendar.controller.CalendarController;
 import calendar.view.exceptions.MissingParameterException;
 
+/** Concrete implementation of the use command. */
 public class UseCommand implements Command {
   private String[] tokens;
   private CalendarController controller;
 
+  /** Constructor for the use command. */
   public UseCommand(String[] tokens, CalendarController controller) {
     this.tokens = tokens;
     this.controller = controller;
   }
 
+  /** Executes the use command. */
   @Override
   public String execute() throws Exception {
     int index = 1;

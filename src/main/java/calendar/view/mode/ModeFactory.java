@@ -4,14 +4,19 @@ import java.util.Scanner;
 
 import calendar.controller.CalendarController;
 
+/** Class responsible for creating a concrete class
+ * implementing the mode interface.*/
 public class ModeFactory {
 
   private final CalendarController controller;
 
+  /** Constructor for the Mode factory. */
   public ModeFactory(CalendarController controller) {
     this.controller = controller;
   }
 
+  /** Method for parsing input and returning a concrete class
+   * implementing the mode interface */
   public Mode getMode() {
     Scanner scanner = new Scanner(System.in);
 
