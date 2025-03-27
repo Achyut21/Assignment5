@@ -24,7 +24,8 @@ public class CSVCalendarExporter implements CalendarExporter {
     DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
     DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
     try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
-      writer.write("Subject,Start Date,Start Time,End Date,End Time,All Day Event,Description,Location,Private");
+      // Write header with all fields quoted.
+      writer.write("\"Subject\",\"Start Date\",\"Start Time\",\"End Date\",\"End Time\",\"All Day Event\",\"Description\",\"Location\",\"Private\"");
       writer.newLine();
       // Retrieve all events using a wide range.
       List<Event> events = calendar.getEventsBetween(
@@ -47,7 +48,8 @@ public class CSVCalendarExporter implements CalendarExporter {
         String isPrivate = (!event.isPublic()) ? "True" : "False";
         String description = event.getDescription();
         String location = event.getLocation();
-        writer.write(String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s",
+        // Wrap each field in quotes.
+        writer.write(String.format("\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"",
             subject, startDate, startTime, endDate, endTime, allDay, description, location, isPrivate));
         writer.newLine();
       }

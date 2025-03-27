@@ -85,6 +85,17 @@ This application is a command line based calendar system capable of creating and
 - **Export to CSV**  
   `export cal my_calendar.csv`
 
+# Key Changes from Assignment 4 to Assignment 5
+
+- **Multiple Calendars Support:** Introduced a new `CalendarManager` class to manage multiple calendars and ensure each calendar has a unique name.
+- **Timezone Support:** Added timezone support to calendars (with getters, setters, and edit methods) so that each calendar is associated with an IANA timezone.
+- **Enhanced Command Set:** Extended the command set to include commands for creating, editing, and using calendars, plus new copy commands for transferring events across calendars.
+- **Refactored Export Functionality:** Moved the CSV export functionality from the `Calendar` class into its own `CSVCalendarExporter` class that implements the `CalendarExporter` interface for future extensibility.
+- **Default Conflict Behavior:** Changed event creation to always decline new events if a conflict exists, thereby making conflict declination the default behavior.
+- **Improved Recurring Event Editing:** Modified the logic for editing recurring events so that the "edit events from" command now applies to all events starting at or after a specified time.
+- **Copy Commands Added:** Implemented commands to copy a single event and groups of events (by day or over an interval) from one calendar to another with appropriate time adjustments.
+- **Controller & Command Refactoring:** Refactored the controller and command processing to use concrete command classes (e.g., `CreateCommand`, `EditCommand`, `CopyCommand`, etc.) for better separation of concerns under the MVC architecture.
+
 ### Distribution of Work
 For this assignment, Achyut primarily worked on implementing the functional parts of the rubric.
 Marcus did the refactoring and worked on implementing the factories as well as the testing. 

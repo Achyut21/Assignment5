@@ -1,6 +1,0 @@
-create event Meeting from 2025-04-01T10:00 to 2025-04-01T11:00 --autodecline
-create event Holiday on 2025-04-10
-edit event description Meeting from 2025-04-01T10:00 to 2025-04-01T11:00 with UpdatedMeeting
-print events on 2025-04-01
-export cal calendar.csv
-show status on 2025-04-01T10:30
